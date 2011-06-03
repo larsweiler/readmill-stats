@@ -1,23 +1,80 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<script src="jquery-latest.js"></script>
+		<script type="text/javascript" src="jquery-latest.js"></script>
+		<script type="text/javascript" src="jqPlot/jquery.jqplot.js"></script>
+		<script type="text/javascript" src="jqPlot/plugins/jqplot.pieRenderer.js"></script>
+		<link rel="stylesheet" type="text/css" href="jqPlot/jquery.jqplot.css" />
 		<script type="text/javascript">
 			function getname() {
 				var uid = document.getElementById('uid').value;
 				$.getJSON("http://api.readmill.com/users/"+uid+".json?client_id=a84d30c642dfddf2fa1ae9376f97a4e5",
-				function(user) {
-					document.getElementById('username').innerHTML = user.username;
-				});
+					function(user) {
+						var books = [ 
+							['Open', user.books_open],
+							['Finished', user.books_finished],
+							['Interesting', user.books_interesting],
+							['Abandoned', user.books_abandoned]
+						];
+						drawGraph(books, uid, user.fullname);
+					});
 			};
+
+			function drawGraph(books, uid, name) {
+				var plot = jQuery.jqplot ('chart', [books],
+					{
+						seriesDefaults: {
+							renderer: jQuery.jqplot.PieRenderer,
+							rendererOptions: {
+								dataLabels: 'value',
+								showDataLabels: true,
+								hilightMouseOver: true
+							}
+						},
+						title: "Books statistics for "+name,
+						legend: { show: true, location: 'e' }
+					}
+				);
+				$('#chart').bind('jqplotDataHighlight',
+					function (ev, seriesIndex, pointIndex, data) {
+						$.getJSON("http://api.readmill.com/users/"+uid+"/readings.json?client_id=a84d30c642dfddf2fa1ae9376f97a4e5",
+							function(readings) {
+								var books = new Array();
+								for (i in readings) {
+									var state;
+									var currentbook = new Array();
+									if (data[0] == "Interesting" ) { state = 1; };
+									if (data[0] == "Open" ) { state = 2; };
+									if (data[0] == "Finished" ) { state = 3; };
+									if (data[0] == "Abandoned" ) { state = 4; };
+									if (readings[i].state == state) {
+										currentbook["title"] = readings[i].book.title;
+										currentbook["author"] = readings[i].book.author;
+									}
+									books.push(currentbook);
+								}
+								drawBooks(books);
+							}
+						)
+					}
+				);
+			};
+
+			function drawBooks(books) {
+				var bookshtml = "";
+				for (i in books) {
+					bookshtml = bookshtml.concat("<span>"+books[i]["title"]+" by "+books[i]["author"]+"</span><br/>");
+				}
+				$('#books').html(bookshtml);
+			}
 		</script>
 	</head>
 	<body>
-		<input type="text" id="uid" size="4" value="UID"/>
-		<input type="button" onclick="getname()" value="Get Username"/>
-		<div>
-			<span style="margin-right:2em;">Username:</span><span id="username"></span>
-		</div>
+		<input type="text" id="uid" size="20" value="UID or Username" onfocus="this.value=''"/>
+		<input type="button" onclick="getname()" value="Draw Chart"/>
+
+		<div id="chart" style="height:400px; width:400px; margin-top:2em;"></div>
+		<div id="books" stile="height:200px; width:400px;"></div>
 		
 	</body>
 </html>
