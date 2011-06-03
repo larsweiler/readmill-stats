@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="jquery-latest.js"></script>
+		<script type="text/javascript">
+			function getname() {
+				var uid = document.getElementById('uid').value;
+				$.getJSON("http://api.readmill.com/users/"+uid+".json?client_id=a84d30c642dfddf2fa1ae9376f97a4e5",
+				function(user) {
+					document.getElementById('username').innerHTML = user.username;
+				});
+			};
+		</script>
+	</head>
+	<body>
+		<input type="text" id="uid" size="4" value="UID"/>
+		<input type="button" onclick="getname()" value="Get Username"/>
+		<div>
+			<span style="margin-right:2em;">Username:</span><span id="username"></span>
+		</div>
+		
+	</body>
+</html>
