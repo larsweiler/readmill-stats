@@ -62,8 +62,12 @@
 			function drawBooks(books) {
 				var bookshtml = "";
 				for (i in books) {
-					// bookshtml = bookshtml.concat("<span>"+["count"]+books[i]["title"]+" by "+books[i]["author"]+"</span><br/>");
-					bookshtml = bookshtml.concat("<span>"+books[i].title+" by "+books[i].author+"</span><br/>");
+					var b=books[i];
+					bookshtml = bookshtml.concat("<p style=\"margin-left:1em; margin-bottom:1em;\">"
+						+"<a href=\""+b.permalink_url+"\">"
+						+"<img src=\""+b.cover_url+"\" style=\"float:left; margin:5px; border:none;\"/>"
+						+"</a>"
+						+"</p>");
 				}
 				$('#books').html(bookshtml);
 			}
@@ -73,8 +77,10 @@
 		<input type="text" id="uid" size="20" value="220" onfocus="this.value=''"/>
 		<input type="button" onclick="getstats()" value="Draw Chart"/>
 
-		<div id="chart" style="height:400px; width:400px; margin-top:2em;"></div>
-		<div id="books" style="height:200px; width:400px;"></div>
+		<div style="position:relative; height:400px; margin-top:2em;">
+			<div id="chart" style="height:400px; width:400px; position:absolute; left:0; width:70%;"></div>
+			<div id="books" style="height:200px; width:400px; position:absolute; right:0; width:30%;"></div>
+		</div>
 		
 	</body>
 </html>
