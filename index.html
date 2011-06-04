@@ -28,13 +28,17 @@
 							rendererOptions: {
 								dataLabels: 'value',
 								showDataLabels: true,
-								hilightMouseOver: true
+								hilightMouseOver: true,
+								fill: false,
+								sliceMargin: 4,
+								lineWidth: 5
 							}
 						},
 						title: "Books statistics for "+name,
 						legend: { show: true, location: 'e' }
 					}
 				);
+				plot.replot({resetAxes:true});
 				$('#chart').bind('jqplotDataHighlight',
 					function (ev, seriesIndex, pointIndex, data) {
 						$.getJSON("http://api.readmill.com/users/"+uid+"/readings.json?client_id=a84d30c642dfddf2fa1ae9376f97a4e5",
