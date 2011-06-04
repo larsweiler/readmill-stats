@@ -6,7 +6,7 @@
 		<script type="text/javascript" src="jqPlot/plugins/jqplot.pieRenderer.js"></script>
 		<link rel="stylesheet" type="text/css" href="jqPlot/jquery.jqplot.css" />
 		<script type="text/javascript">
-			function getname() {
+			function getstats() {
 				var uid = document.getElementById('uid').value;
 				$.getJSON("http://api.readmill.com/users/"+uid+".json?client_id=a84d30c642dfddf2fa1ae9376f97a4e5",
 					function(user) {
@@ -48,10 +48,9 @@
 									if (data[0] == "Finished" ) { state = 3; };
 									if (data[0] == "Abandoned" ) { state = 4; };
 									if (readings[i].state == state) {
-										currentbook["title"] = readings[i].book.title;
-										currentbook["author"] = readings[i].book.author;
+										currentbook = readings[i].book
+										books.push(currentbook);
 									}
-									books.push(currentbook);
 								}
 								drawBooks(books);
 							}
@@ -63,18 +62,19 @@
 			function drawBooks(books) {
 				var bookshtml = "";
 				for (i in books) {
-					bookshtml = bookshtml.concat("<span>"+books[i]["title"]+" by "+books[i]["author"]+"</span><br/>");
+					// bookshtml = bookshtml.concat("<span>"+["count"]+books[i]["title"]+" by "+books[i]["author"]+"</span><br/>");
+					bookshtml = bookshtml.concat("<span>"+books[i].title+" by "+books[i].author+"</span><br/>");
 				}
 				$('#books').html(bookshtml);
 			}
 		</script>
 	</head>
 	<body>
-		<input type="text" id="uid" size="20" value="UID or Username" onfocus="this.value=''"/>
-		<input type="button" onclick="getname()" value="Draw Chart"/>
+		<input type="text" id="uid" size="20" value="220" onfocus="this.value=''"/>
+		<input type="button" onclick="getstats()" value="Draw Chart"/>
 
 		<div id="chart" style="height:400px; width:400px; margin-top:2em;"></div>
-		<div id="books" stile="height:200px; width:400px;"></div>
+		<div id="books" style="height:200px; width:400px;"></div>
 		
 	</body>
 </html>
