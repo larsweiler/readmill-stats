@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script type="text/javascript" src="script/jquery-latest.js"></script>
+		<script type="text/javascript" src="script/jquery.jqplot.min.js"></script>
+		<script type="text/javascript" src="script/jqplot.barRenderer.min.js"></script>
+		<script type="text/javascript" src="script/jqplot.categoryAxisRenderer.min.js"></script>
+		<script type="text/javascript" src="script/jqplot.pointLabels.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="style/jquery.jqplot.min.css" />
+		<script type="text/javascript">
+
+			function getstats() {
+				var uid1 = document.getElementById('uid1').value;
+				var uid2 = document.getElementById('uid2').value;
+				var followers = new Array();
+				var followings = new Array();
+				$.getJSON("http://api.readmill.com/users/"+uid1+".json?client_id=a84d30c642dfddf2fa1ae9376f97a4e5&callback=?",
+					function(user1) {
+						followers.push(user1.followers);
+						followings.push(user1.followings);
+						$.getJSON("http://api.readmill.com/users/"+uid2+".json?client_id=a84d30c642dfddf2fa1ae9376f97a4e5&callback=?",
+							function(user2) {
+								followers.push(user2.followers);
+								followings.push(user2.followings);
+								drawGraph(user1.fullname, user2.fullname, followers, followings);
+							}
+						);
+					}
+				);
+			};
+
+			function drawGraph(user1, user2, followers, followings) {
+				plot = $.jqplot('chart1', [followers, followings], {
+					stackSeries: true,
+					seriesDefaults: {
+						renderer: $.jqplot.BarRenderer,
+						rendererOptions: {
+							barMargin: 30,
+							highlightMouseDown: true
+						},
+						pointLabels: {show: true}
+					},
+					axes: {
+						xaxis: {
+							renderer: $.jqplot.CategoryAxisRenderer,
+							ticks: [user1, user2]
+						},
+						yaxis: {
+							autoscale: false,
+							min: 0,
+							max: 220
+						}
+					},
+					legend: {
+						show: true,
+						location: 'e',
+						placement: 'outside'
+					},
+					series:[
+						{label:'Followers'},
+						{label:'Followings'}
+					]
+				});
+				plot.replot({resetAxes:true});
+			};
+
+		</script>
+</head>
+<body>
+	<input type="text" id="uid1" size="20" value="lars" onfocus="this.value=''"/>
+	<input type="button" onclick="getstats()" value="Compare!"/>
+	<input type="text" id="uid2" size="20" value="henrik" onfocus="this.value=''"/>
+	
+	<div style="position:relative; height:400px; margin-top:2em;">
+		<div id="chart1" style="height:400px; width:50%; position:absolute; left:0;"></div>
+		<div id="chart2" style="height:400px; width:50%; position:absolute; right:0;"></div>
+	</div>
+</body>
+</html>
