@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<script type="text/javascript" src="jquery-latest.js"></script>
-		<script type="text/javascript" src="jqPlot/jquery.jqplot.js"></script>
-		<script type="text/javascript" src="jqPlot/plugins/jqplot.pieRenderer.js"></script>
-		<link rel="stylesheet" type="text/css" href="jqPlot/jquery.jqplot.css" />
+		<script type="text/javascript" src="script/jquery-latest.js"></script>
+		<script type="text/javascript" src="script/jquery.jqplot.min.js"></script>
+		<script type="text/javascript" src="script/jqplot.pieRenderer.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="style/jquery.jqplot.min.css" />
 		<script type="text/javascript">
 			function getstats() {
 				var uid = document.getElementById('uid').value;
-				$.getJSON("http://api.readmill.com/users/"+uid+".json?client_id=a84d30c642dfddf2fa1ae9376f97a4e5",
+				$.getJSON("http://api.readmill.com/users/"+uid+".json?client_id=a84d30c642dfddf2fa1ae9376f97a4e5&callback=?",
 					function(user) {
 						var books = [ 
 							['Open', user.books_open],
@@ -41,7 +41,7 @@
 				plot.replot({resetAxes:true});
 				$('#chart').bind('jqplotDataHighlight',
 					function (ev, seriesIndex, pointIndex, data) {
-						$.getJSON("http://api.readmill.com/users/"+uid+"/readings.json?client_id=a84d30c642dfddf2fa1ae9376f97a4e5",
+						$.getJSON("http://api.readmill.com/users/"+uid+"/readings.json?client_id=a84d30c642dfddf2fa1ae9376f97a4e5&callback=?",
 							function(readings) {
 								var books = new Array();
 								for (i in readings) {
