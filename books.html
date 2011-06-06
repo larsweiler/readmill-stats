@@ -6,10 +6,16 @@
 		<script type="text/javascript" src="script/jqplot.pieRenderer.min.js"></script>
 		<link rel="stylesheet" type="text/css" href="style/jquery.jqplot.min.css" />
 		<script type="text/javascript">
+			var clientId = "a84d30c642dfddf2fa1ae9376f97a4e5";
+			var userName = "";
+			var uid = "";
+
 			function getstats() {
-				var uid = document.getElementById('uid').value;
-				$.getJSON("http://api.readmill.com/users/"+uid+".json?client_id=a84d30c642dfddf2fa1ae9376f97a4e5&callback=?",
+				userName = document.getElementById('user').value;
+
+				$.getJSON("http://api.readmill.com/users/"+userName+".json?client_id="+clientId+"&callback=?",
 					function(user) {
+						uid = user.id;
 						var books = [ 
 							['Open', user.books_open],
 							['Finished', user.books_finished],
@@ -41,7 +47,7 @@
 				plot.replot({resetAxes:true});
 				$('#chart').bind('jqplotDataHighlight',
 					function (ev, seriesIndex, pointIndex, data) {
-						$.getJSON("http://api.readmill.com/users/"+uid+"/readings.json?client_id=a84d30c642dfddf2fa1ae9376f97a4e5&callback=?",
+						$.getJSON("http://api.readmill.com/users/"+uid+"/readings.json?client_id="+clientId+"&callback=?",
 							function(readings) {
 								var books = new Array();
 								for (i in readings) {
@@ -78,8 +84,12 @@
 		</script>
 	</head>
 	<body>
-		<input type="text" id="uid" size="20" value="UID or Username" onfocus="this.value=''"/>
-		<input type="button" onclick="getstats()" value="Draw Chart"/>
+		<div id="user-picker">
+			<form>
+				<input type="text" id="user" size="20" value="Try a username" onfocus="this.value=''"/>
+				<input type="button" onclick="getstats()" value="Draw Chart"/>
+			</form>
+		</div>
 
 		<div style="position:relative; height:400px; margin-top:2em;">
 			<div id="chart" style="height:400px; width:70%; position:absolute; left:0;"></div>
