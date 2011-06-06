@@ -8,28 +8,35 @@
 		<script type="text/javascript" src="script/jqplot.pointLabels.min.js"></script>
 		<link rel="stylesheet" type="text/css" href="style/jquery.jqplot.min.css" />
 		<script type="text/javascript">
+			var clientId = "a84d30c642dfddf2fa1ae9376f97a4e5";
 
 			function getstats() {
 				var uid1 = document.getElementById('uid1').value;
 				var uid2 = document.getElementById('uid2').value;
 				var followers = new Array();
 				var followings = new Array();
-				$.getJSON("http://api.readmill.com/users/"+uid1+".json?client_id=a84d30c642dfddf2fa1ae9376f97a4e5&callback=?",
+				$.getJSON("http://api.readmill.com/users/"+uid1+".json?client_id="+clientId+"&callback=?",
 					function(user1) {
 						followers.push(user1.followers);
 						followings.push(user1.followings);
-						$.getJSON("http://api.readmill.com/users/"+uid2+".json?client_id=a84d30c642dfddf2fa1ae9376f97a4e5&callback=?",
+						$.getJSON("http://api.readmill.com/users/"+uid2+".json?client_id="+clientId+"&callback=?",
 							function(user2) {
 								followers.push(user2.followers);
 								followings.push(user2.followings);
-								drawGraph(user1.fullname, user2.fullname, followers, followings);
+								drawFollowGraph(user1.fullname, user2.fullname, followers, followings);
+								drawBooksGraph(user1.fullname, user2.fullname,
+									[user1.books_open, user2.books_open],
+									[user1.books_finished, user2.books_finished],
+									[user1.books_abandoned, user2.books_abandoned],
+									[user1.books_interesting, user2.books_interesting]);
+								drawDurationGraph(user1.id, user2.id, user1.fullname, user2.fullname);
 							}
 						);
 					}
 				);
 			};
 
-			function drawGraph(user1, user2, followers, followings) {
+			function drawFollowGraph(user1, user2, followers, followings) {
 				plot = $.jqplot('chart1', [followers, followings], {
 					stackSeries: true,
 					seriesDefaults: {
@@ -47,13 +54,14 @@
 						},
 						yaxis: {
 							autoscale: false,
-							min: 0,
-							max: 220
+							padMin: 0,
+							padMax: 1.2
 						}
 					},
+					title: "Follows",
 					legend: {
 						show: true,
-						location: 'e',
+						location: 's',
 						placement: 'outside'
 					},
 					series:[
@@ -64,6 +72,85 @@
 				plot.replot({resetAxes:true});
 			};
 
+			function drawBooksGraph(user1, user2, open, finished, abandoned, interesting) {
+				plot = $.jqplot('chart2', [open, finished, abandoned, interesting], {
+					stackSeries: true,
+					seriesDefaults: {
+						renderer: $.jqplot.BarRenderer,
+						rendererOptions: {
+							barMargin: 30,
+							highlightMouseDown: true
+						},
+						pointLabels: {show: true}
+					},
+					axes: {
+						xaxis: {
+							renderer: $.jqplot.CategoryAxisRenderer,
+							ticks: [user1, user2]
+						},
+						yaxis: {
+							autoscale: false,
+							padMin: 0,
+							padMax: 1.2
+						}
+					},
+					title: "Books",
+					legend: {
+						show: true,
+						location: 's',
+						placement: 'outside'
+					},
+					series:[
+						{label:'Open'},
+						{label:'Finished'},
+						{label:'Abandoned'},
+						{label:'Interesting'}
+					]
+				});
+				plot.replot({resetAxes:true});
+			};
+
+			function drawDurationGraph(uid1, uid2, username1, username2) {
+				var duration1 = 0;
+				var duration2 = 0;
+				$.getJSON("http://api.readmill.com/users/"+uid1+"/readings.json?client_id="+clientId+"&callback=?",
+					function(user1) {
+						for (var r in user1) { duration1 += user1[r].duration; };
+						$.getJSON("http://api.readmill.com/users/"+uid2+"/readings.json?client_id="+clientId+"&callback=?",
+							function(user2) {
+								for (var p in user2) { duration2 += user2[p].duration; };
+
+								plot = $.jqplot('chart3', [[duration1, duration2]], {
+									seriesDefaults: {
+										renderer: $.jqplot.BarRenderer,
+										pointLabels: {show: true}
+									},
+									axes: {
+										xaxis: {
+											renderer: $.jqplot.CategoryAxisRenderer,
+											ticks: [username1, username2]
+										},
+										yaxis: {
+											label: 'seconds',
+											autoscale: false,
+											padMin: 0,
+											padMax: 1.2
+										}
+									},
+									title: "Reading durations",
+									legend: {
+										show: false
+									}
+								});
+								plot.replot({resetAxes:true});
+							}
+						);
+					}
+				);
+
+
+			};
+
 		</script>
 </head>
 <body>
@@ -71,9 +158,13 @@
 	<input type="button" onclick="getstats()" value="Compare!"/>
 	<input type="text" id="uid2" size="20" value="henrik" onfocus="this.value=''"/>
 	
-	<div style="position:relative; height:400px; margin-top:2em;">
+	<div style="position:relative; height:500px; margin-top:2em;">
 		<div id="chart1" style="height:400px; width:50%; position:absolute; left:0;"></div>
 		<div id="chart2" style="height:400px; width:50%; position:absolute; right:0;"></div>
+	</div>
+	<div style="position:relative; height:500px; margin-top:2em;">
+		<div id="chart3" style="height:400px; width:50%; position:absolute; left:0;"></div>
+		<div id="chart4" style="height:400px; width:50%; position:absolute; right:0;"></div>
 	</div>
 </body>
 </html>
